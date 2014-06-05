@@ -30,6 +30,7 @@ $user="username";	//Change this
 $pass="password";	//Change this
 $rid="1";		//Check this
 $gid="1";		//Check this
+$pid="1";		//Check this
 
 /* Contact data */
 $data=array(
@@ -37,7 +38,7 @@ $data=array(
 	'plan'=>$plan,
 	'user'=>$user,
 	'pass'=>$pass,
-	'rid'=>$rid,
+	'rid'=>$rid,					//From Id for list-unsubscribers and aut-response
 	'gid'=>$gid,
 	'email'=>'soporte@teenvio.com',			//Email
 	'nombre'=>'Soporte/support teenvio.com',	//Name
@@ -48,6 +49,10 @@ $data=array(
 	'dato_1'=>'extra data one',			//Extra data 1
 	'dato_2'=>'extra data two'			//Extra data 2
 
+	/* Data for email auto-response */
+	'pid'=>$pid					//Id Pieza/Newsletter auto-response
+	'subject'=>'Automatic email'			//Subject auto-response
+	'bcc'=>'Email copy'				//Email for copy
 );
 
 print_r($data);

@@ -1,4 +1,4 @@
 POST-API
 ========
 
-Teenvio POST-API v1.1-201406
+Teenvio POST-API v1.2-201412

@@ -51,7 +51,6 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TeenvioAPI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" />
@@ -62,4 +61,10 @@
       </Properties>
     </MonoDevelop>
   </ProjectExtensions>
+  <ItemGroup>
+    <ProjectReference Include="..\TeenvioAPI\TeenvioAPI.csproj">
+      <Project>{76483F41-5186-42AC-938E-E2AD20EAD1E0}</Project>
+      <Name>TeenvioAPI</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

@@ -22,5 +22,19 @@ namespace Example_APIPOST {
 		protected System.Web.UI.WebControls.Button button2;
 		
 		protected System.Web.UI.WebControls.TextBox textBox2;
+		
+		protected System.Web.UI.WebControls.Button button3;
+		
+		protected System.Web.UI.WebControls.TextBox textBox3;
+		
+		protected System.Web.UI.WebControls.Button button4;
+		
+		protected System.Web.UI.WebControls.ListBox listBox1;
+		
+		protected System.Web.UI.WebControls.TreeView treeView1;
+		
+		protected System.Web.UI.WebControls.Button button5;
+		
+		protected System.Web.UI.WebControls.TextBox textBox5;
 	}
 }

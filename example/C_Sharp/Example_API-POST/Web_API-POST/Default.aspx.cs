@@ -23,10 +23,11 @@ namespace Example_APIPOST{
 	using System.Web.UI;
 	using System.Collections.Generic;
 	using System.Xml;
+	using Teenvio;
 
 	public partial class Default : System.Web.UI.Page{
 
-		private teenvio.com.API api;
+		private TeenvioAPI api;
 
 		private int currentIdCampaign=0;
 
@@ -37,7 +38,7 @@ namespace Example_APIPOST{
 			//**************************************
 
 			// user.plan: two parts from teenvio login separated by .
-			api = new teenvio.com.API("user","plan","password");
+			api = new TeenvioAPI("victor","teenviov3","tor");
 
 			//***************************************
 			//    Set the HTTP Method: GET or POST
@@ -66,14 +67,24 @@ namespace Example_APIPOST{
 			contact.Add ("dato_1", "extra data one");			//Extra data 1
 			contact.Add ("dato_2", "extra data two");			//Extra data 2
 
-			textBox1.Text = api.SaveContact (contact, 1);
+			try{
+				int idContact=api.SaveContact (contact, 1);
+				textBox1.Text = idContact.ToString();
+			}catch(TeenvioException ex){
+				textBox1.Text = ex.Message;
+			}
 
 		}
 
 		//Delete contact
 		public void button2Clicked (object sender, EventArgs args){
 
-			textBox2.Text = api.DeleteContact ("api.net@teenvio.com");
+			try{
+				api.DeleteContact ("api.net@teenvio.com");
+				textBox2.Text = "OK";
+			}catch( TeenvioException ex){
+				textBox2.Text = ex.Message;
+			}
 
 		}
 
@@ -92,15 +103,19 @@ namespace Example_APIPOST{
 
 		}
 
-		//Get last Campaings
+		//Get lasts Campaigns
 		public void button4Clicked (object sender, EventArgs args){
-
-			int[] ids = api.GetCampaigns();
 
 			listBox1.Items.Clear();
 
-			foreach (int i in ids) {
-				listBox1.Items.Add (new System.Web.UI.WebControls.ListItem(i.ToString()+" - "+getStatName(i),i.ToString()));
+			try{
+				int[] ids = api.GetCampaigns();
+
+				foreach (int i in ids) {
+					listBox1.Items.Add (new System.Web.UI.WebControls.ListItem(i.ToString()+" - "+getStatName(i),i.ToString()));
+				}
+			}catch(TeenvioException ex){
+				textBox2.Text = ex.Message;
 			}
 
 		}
@@ -128,7 +143,7 @@ namespace Example_APIPOST{
 				}
 			}
 
-			string xml = api.GetContactsStatSection (id, teenvio.com.API.StatSection.SEND_OPENED_UNSUBSCRIBED);
+			string xml = api.GetContactsStatSection (id, TeenvioAPI.StatSection.ALL);
 
 			XmlDocument dom = new XmlDocument();
 			dom.LoadXml(xml);

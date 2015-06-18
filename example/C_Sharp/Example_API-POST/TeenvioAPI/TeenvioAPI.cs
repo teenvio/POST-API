@@ -17,14 +17,14 @@
 /// along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /// ---------------------------------------------------------------------------------
 
-namespace teenvio.com{
+namespace Teenvio{
 	using System;
 	using System.Web;
 	using System.Collections.Generic;
 	using System.Text;
 	using System.Net;
 
-	public class API
+	public class TeenvioAPI
 	{
 		public const string Version="1.0-20150616";
 
@@ -46,6 +46,12 @@ namespace teenvio.com{
 			UNSEND_FAILED_NOMENCLATURE,
 			CLICKED
 		}
+		public enum OutputMode{
+			PLAIN,
+			JSON,
+			XML,
+			CSV
+		}
 
 		private string urlBase="https://master2.teenvio.com/v4/public/api/post/";
 		//private string urlBase="https://secure.teenvio.com/v4/public/api/post/";
@@ -55,10 +61,48 @@ namespace teenvio.com{
 		private string pass="";
 		private Method apiMethod=Method.POST;
 
-		public API(string user,string plan, string pass){
+		public TeenvioAPI(string user,string plan, string pass){
 			this.user = user;
 			this.plan = plan;
 			this.pass = pass;
+		}
+
+		/// <summary>
+		/// Gets current client version.
+		/// </summary>
+		/// <returns>Number of current client version</returns>
+		public string getClientVersion(){
+			return TeenvioAPI.Version;
+		}
+
+		/// <summary>
+		/// Gets the server version.
+		/// </summary>
+		/// <returns>The server version.</returns>
+		public string getServerVersion(){
+			Dictionary<string, string> Params = new Dictionary<string, string>();
+			Params.Add ("action", "get_version");
+			Params.Add ("plan", this.plan);
+			Params.Add ("user", this.user);
+			Params.Add ("pass", this.pass);
+			string bruto=GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring(0,2)=="OK"){
+				return bruto.Substring(3);
+			}
+			throw new TeenvioException(bruto);
+		}
+
+		/// <summary>
+		/// Check connection whit currents params
+		/// </summary>
+		public Boolean Ping(){
+			Dictionary<string, string> Params = new Dictionary<string, string>();
+			Params.Add ("action", "get_version");
+			Params.Add ("plan", this.plan);
+			Params.Add ("user", this.user);
+			Params.Add ("pass", this.pass);
+			string bruto=GetResponse(this.urlBase, Params, this.apiMethod);
+			return (bruto.Substring (0, 2) == "OK");
 		}
 
 		/// <summary>
@@ -78,7 +122,8 @@ namespace teenvio.com{
 		/// <summary>
 		/// Save new or Update contact
 		/// </summary>
-		public string SaveContact(Dictionary<string, string> Params,int fromId=1, int groupId=0, int newsletterId=0){
+		/// <returns>Contact Id</returns>
+		public int SaveContact(Dictionary<string, string> Params,int fromId=1, int groupId=0, int newsletterId=0){
 			Params.Add ("action", "contact_save");
 			Params.Add ("plan", this.plan);
 			Params.Add ("user", this.user);
@@ -88,13 +133,17 @@ namespace teenvio.com{
 			if (groupId!=0){
 				Params.Add ("gid", groupId.ToString());
 			}
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring(0,2)=="OK"){
+				return int.Parse (bruto.Substring (3));
+			}
+			throw new TeenvioException(bruto);
 		}
 
 		/// <summary>
 		/// Delete contact
 		/// </summary>
-		public string DeleteContact(string email){
+		public void DeleteContact(string email){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "contact_delete");
 			Params.Add ("plan", this.plan);
@@ -102,14 +151,16 @@ namespace teenvio.com{
 			Params.Add ("pass", this.pass);
 			Params.Add ("email", email);
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
-
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) != "OK") {
+				throw new TeenvioException (bruto);
+			}
 		}
 
 		/// <summary>
 		/// Group contact
 		/// </summary>
-		public string GroupContact(string email, int groupId){
+		public void GroupContact(string email, int groupId){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "contact_group");
 			Params.Add ("plan", this.plan);
@@ -118,13 +169,16 @@ namespace teenvio.com{
 			Params.Add ("email", email);
 			Params.Add ("gid", groupId.ToString());
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) != "OK") {
+				throw new TeenvioException (bruto);
+			}
 		}
 
 		/// <summary>
 		/// Ungroup contact
 		/// </summary>
-		public string UnGroupContact(string email, int groupId){
+		public void UnGroupContact(string email, int groupId){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "contact_ungroup");
 			Params.Add ("plan", this.plan);
@@ -133,13 +187,16 @@ namespace teenvio.com{
 			Params.Add ("email", email);
 			Params.Add ("gid", groupId.ToString());
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) != "OK") {
+				throw new TeenvioException (bruto);
+			}
 		}
 
 		/// <summary>
 		/// Deactivate contact
 		/// </summary>
-		public string DeactivateContact(string email, int fromId){
+		public void DeactivateContact(string email, int fromId){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "contact_deactivate");
 			Params.Add ("plan", this.plan);
@@ -148,13 +205,16 @@ namespace teenvio.com{
 			Params.Add ("email", email);
 			Params.Add ("rid", fromId.ToString());
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) != "OK") {
+				throw new TeenvioException (bruto);
+			}
 		}
 
 		/// <summary>
 		/// Activate contact
 		/// </summary>
-		public string ActivateContact(string email, int fromId){
+		public void ActivateContact(string email, int fromId){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "contact_activate");
 			Params.Add ("plan", this.plan);
@@ -163,45 +223,55 @@ namespace teenvio.com{
 			Params.Add ("email", email);
 			Params.Add ("rid", fromId.ToString());
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) != "OK") {
+				throw new TeenvioException (bruto);
+			}
 		}
 
 		/// <summary>
 		/// Get XML Stats Data
 		/// </summary>
-		public string GetStats(int id){
+		public string GetStats(int id, OutputMode mode=OutputMode.XML){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "get_stats");
 			Params.Add ("plan", this.plan);
 			Params.Add ("user", this.user);
 			Params.Add ("pass", this.pass);
-			Params.Add ("mode", "xml"); //XML or JSON
+			Params.Add ("mode", mode.ToString().ToLower()); //XML or JSON
 			Params.Add ("eid", id.ToString());
 
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) == "KO") {
+				throw new TeenvioException (bruto);
+			}
 			return GetResponse(this.urlBase, Params, this.apiMethod);
 		}
 
 		/// <summary>
-		/// Get XML List conctact from section into Stats
+		/// Get XML, JSON, PLAIN List conctact from section into Stats
 		/// </summary>
-		public string GetContactsStatSection(int id, StatSection section){
+		public string GetContactsStatSection(int id, StatSection section, OutputMode mode=OutputMode.XML){
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "get_contacts_stat_section");
 			Params.Add ("plan", this.plan);
 			Params.Add ("user", this.user);
 			Params.Add ("pass", this.pass);
-			Params.Add ("mode", "xml"); //CSV, XML or JSON
+			Params.Add ("mode", mode.ToString().ToLower()); //CSV, XML or JSON
 			Params.Add ("eid", id.ToString());
 			Params.Add ("section", section.ToString().ToLower());
 
-			return GetResponse(this.urlBase, Params, this.apiMethod);
+			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) == "KO") {
+				throw new TeenvioException (bruto);
+			}
+			return bruto;
 		}
 
 		/// <summary>
 		/// Get last ids Campaings/Stats
 		/// </summary>
 		public int[] GetCampaigns(int limit=25){
-
 			Dictionary<string, string> Params = new Dictionary<string, string>();
 			Params.Add ("action", "get_campaigns");
 			Params.Add ("plan", this.plan);
@@ -211,6 +281,9 @@ namespace teenvio.com{
 			Params.Add ("limit", limit.ToString());
 
 			string bruto= GetResponse(this.urlBase, Params, this.apiMethod);
+			if (bruto.Substring (0, 2) == "KO") {
+				throw new TeenvioException (bruto);
+			}
 
 			string[] array=bruto.Split (new string[] { "\n" }, StringSplitOptions.None);
 

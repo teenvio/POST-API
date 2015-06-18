@@ -38,7 +38,7 @@ namespace Example_APIPOST{
 			//**************************************
 
 			// user.plan: two parts from teenvio login separated by .
-			api = new TeenvioAPI("victor","teenviov3","tor");
+			api = new TeenvioAPI("user","plan","pass");
 
 			//***************************************
 			//    Set the HTTP Method: GET or POST

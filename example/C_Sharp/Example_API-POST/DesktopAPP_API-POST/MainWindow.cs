@@ -1,43 +1,126 @@
 using System;
+using System.Threading;
+using System.Xml;
 using Gtk;
-using System.Collections.Generic;
+using Teenvio;
 
-public partial class MainWindow: Gtk.Window
-{	
-	public MainWindow (): base (Gtk.WindowType.Toplevel)
-	{
-		Build ();
+namespace DesktopAPP_APIPOST
+{
+
+	[Gtk.TreeNode (ListOnly=true)]
+	public class CampaignTreeNode : Gtk.TreeNode {
+
+		public CampaignTreeNode (int id, string name)
+		{
+			this.id = id;
+			this.Name = name;
+		}
+
+		[Gtk.TreeNodeValue (Column=0)]
+		public int id;
+
+		[Gtk.TreeNodeValue (Column=1)]
+		public string Name;
 	}
 
-	protected void OnDeleteEvent (object sender, DeleteEventArgs a)
+	public partial class MainWindow : Gtk.Window
 	{
-		Application.Quit ();
-		a.RetVal = true;
-	}
 
-	protected void btnEnter_Click (object sender, EventArgs e)
-	{
-		teenvio.com.API api = new teenvio.com.API (txtUser.Text, txtPlan.Text, txtPassword.Text);
-		Dictionary<string, string> contact = new Dictionary<string,string> ();
-		contact.Add ("email", "soporte@teenvio.com");
 
-		string campaings = api.SaveContact (contact);
+		private TeenvioAPI api;
 
-		if (campaings.Substring (0, 2) == "KO") {
-			MessageDialog msg = new MessageDialog (this, DialogFlags.Modal, MessageType.Error, ButtonsType.Close, campaings);
-			msg.Title = "Error";
-			ResponseType response = (ResponseType) msg.Run();
-			if (response == ResponseType.Close || response == ResponseType.DeleteEvent) {
-				msg.Destroy();
-			}
-		} else {
-			MessageDialog msg = new MessageDialog (this, DialogFlags.Modal, MessageType.Error, ButtonsType.Close, campaings);
-			msg.Title = "Info";
+		public MainWindow () : base(Gtk.WindowType.Toplevel)
+		{
+			this.Build ();
+		}
 
-			ResponseType response = (ResponseType) msg.Run();
-			if (response == ResponseType.Close || response == ResponseType.DeleteEvent) {
-				msg.Destroy();
-			}
+		protected void OnDeleteEvent (object sender, DeleteEventArgs a)
+		{
+			Application.Quit ();
+			a.RetVal = true;
+		}
+
+		public void setAPI(TeenvioAPI api){
+			this.api = api;
+			lblStatusBarVersion.Text = "Version: "+api.getServerVersion ();
+
+		}
+
+		protected void OnQuitActionActivated (object sender, EventArgs e)
+		{
+			Application.Quit();
+		}
+
+		private void LoadLastCampaigns(){
+
+			lblState.Text = "Loading...";
+
+			Thread oThread = new Thread(new ThreadStart(delegate() {
+				try{
+
+					nodeviewTable.Hide();
+
+					int[] ids = api.GetCampaigns();
+
+					Gtk.NodeStore store = new Gtk.NodeStore (typeof (CampaignTreeNode));
+					foreach(int i in ids){
+						store.AddNode (new CampaignTreeNode (i, getStatName(i)));
+					}
+					
+					Gtk.NodeView view = new Gtk.NodeView (store);
+
+					nodeviewTable.NodeStore=view.NodeStore;
+
+					nodeviewTable.AppendColumn("Id", new Gtk.CellRendererText (), "text", 0);
+					nodeviewTable.AppendColumn("Name", new Gtk.CellRendererText (), "text", 1);
+
+					lblTableTitle.Text="Last Campaigns";
+					nodeviewTable.NodeSelection.Changed += new System.EventHandler (OnNodeviewTableChange);
+
+					nodeviewTable.Show();
+
+
+				}catch(Exception ex){
+					MessageDialog msg = new MessageDialog (this, DialogFlags.Modal, MessageType.Error, ButtonsType.Close, ex.Message);
+					msg.Title = "Error";
+
+					ResponseType response = (ResponseType) msg.Run();
+					if (response == ResponseType.Close || response == ResponseType.DeleteEvent) {
+						msg.Destroy();
+					}
+				}
+				lblState.Text = "Ready";
+			}));
+			oThread.Start ();
+
+		}
+
+		private string getStatName(int id){
+			string xml = api.GetStats (id); 
+
+			XmlDocument dom = new XmlDocument();
+			dom.LoadXml(xml);
+
+			return dom.GetElementsByTagName("name").Item(0).InnerText;
+
+		}
+
+		protected void OnListAction1Activated (object sender, EventArgs e)
+		{
+			this.LoadLastCampaigns ();
+		}
+
+		protected void OnNodeviewTableChange (object o, System.EventArgs args)
+		{
+			Gtk.NodeSelection selection = (Gtk.NodeSelection) o;
+
+			CampaignTreeNode node = (CampaignTreeNode) selection.SelectedNode;
+
+			lblState.Text = "Selected campaign " + node.Name;
+			//label.Text = "Current Selection: \"" + node.SongTitle + "\" by " + node.Artist;
+
+
 		}
 	}
 }
+

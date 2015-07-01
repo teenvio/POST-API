@@ -65,6 +65,7 @@ namespace Teenvio{
 			this.user = user;
 			this.plan = plan;
 			this.pass = pass;
+			ServicePointManager.ServerCertificateValidationCallback = (a, b, c, d) => { return true; };
 		}
 
 		/// <summary>

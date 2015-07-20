@@ -13,7 +13,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="1.0-beta-php-20150707";
+	const clientVersion="1.0-php-20150720";
 	
 	/**
 	 * Outputs Mode 
@@ -182,11 +182,56 @@ class APIClientPOST{
 	 */
 	public function deleteContact($email){
 		$data=array();
-		$data['action']='contact_save';
+		$data['action']='contact_delete';
 		$data['plan']=$this->plan;
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;
 		$data['email']=$email;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)!="OK"){
+			throw new TeenvioException($bruto);
+		}
+	}
+	
+	/**
+	 * Save group
+	 * @param string $name
+	 * @param string $description
+	 * @param int $idGroup For update data
+	 * @return int idGroup
+	 */
+	public function saveGroup($name,$description='',$idGroup=0){
+		$data=array();
+		$data['action']='group_save';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['name']=$name;
+		$data['description']=$description;
+		if ($idGroup!==0){ $data['gid']=$idGroup;}
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)!="OK"){
+			throw new TeenvioException($bruto);
+		}
+		return (int) substr($bruto,4);
+	}
+	
+	/**
+	 * Delete group
+	 * @param int $idGroup
+	 * @throws TeenvioException
+	 */
+	public function deleteGroup($idGroup){
+		$data=array();
+		$data['action']='group_delete';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['gid']=$idGroup;
 		
 		$bruto=$this->getResponse($data);
 		
@@ -284,6 +329,29 @@ class APIClientPOST{
 	}
 	
 	/**
+	 * Return all ocntacta data: fields, groups and campaings
+	 * @param string $email
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 */
+	public function getContactData($email,$outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='contact_data';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['email']=$email;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
 	 * Return stats in $outputMode Format
 	 * Use the consts self::OUTPUT_MODE_* for $outputMode
 	 * @param int $id
@@ -307,6 +375,72 @@ class APIClientPOST{
 		}
 		
 		return $bruto;
+	}
+	
+	/**
+	 * Get contact from section into stats
+	 * @param int $id id stat/campaing
+	 * @param string $section Use the consts self::STAT_SECTION_*
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @return string
+	 * @throws TeenvioException
+	 */
+	public function getContactsStatSection($id,$section=self::STAT_SECTION_ALL,$outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='get_contacts_stat_section';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['mode']=$outputMode;
+		$data['eid']=$id;
+		$data['section']=$section;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Send Email/campaing
+	 * @param int $idGroup
+	 * @param int $idNewsletter
+	 * @param int $idFrom
+	 * @param string $name Interal private name
+	 * @param string $subject 
+	 * @param string $analytics
+	 * @param boolean $header Header with link for reading into navigator
+	 * @param boolean $headerShare Header with links for sharing into social networks
+	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @return int New Campaing/Stat Id
+	 * @throws TeenvioException
+	 */
+	public function sendEmail($idGroup,$idNewsletter,$idFrom,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false){
+		$data=array();
+		$data['action']='send_campaign';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['gid']=$idGroup;
+		$data['pid']=$idNewsletter;
+		$data['rid']=$idFrom;
+		$data['name']=$name;
+		$data['subject']=$subject;
+		$data['analytics']=$analytics;
+		$data['cab']=($header) ? 1 : 0;
+		$data['share']=($headerShare) ? 1 : 0;
+		$data['social_foot']=($socialFoot) ? 1 : 0;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="OK"){
+			return (int) substr($bruto,3);
+		}
+		
+		throw new TeenvioException($bruto);
 	}
 	
 	/**

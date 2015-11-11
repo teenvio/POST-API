@@ -444,6 +444,45 @@ class APIClientPOST{
 	}
 	
 	/**
+	 * Send Email/campaing to one contact
+	 * @param int $idContact
+	 * @param int $idNewsletter
+	 * @param int $idFrom
+	 * @param string $name Interal private name
+	 * @param string $subject 
+	 * @param string $analytics
+	 * @param boolean $header Header with link for reading into navigator
+	 * @param boolean $headerShare Header with links for sharing into social networks
+	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @return int New Campaing/Stat Id
+	 * @throws TeenvioException
+	 */
+	public function sendEmailUnique($idContact,$idNewsletter,$idFrom,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false){
+		$data=array();
+		$data['action']='send_campaign';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['contact_id']=$idContact;
+		$data['pid']=$idNewsletter;
+		$data['rid']=$idFrom;
+		$data['name']=$name;
+		$data['subject']=$subject;
+		$data['analytics']=$analytics;
+		$data['cab']=($header) ? 1 : 0;
+		$data['share']=($headerShare) ? 1 : 0;
+		$data['social_foot']=($socialFoot) ? 1 : 0;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="OK"){
+			return (int) substr($bruto,3);
+		}
+		
+		throw new TeenvioException($bruto);
+	}
+	
+	/**
 	 * Return response from Server
 	 * @param array $data
 	 * @throws TeenvioException

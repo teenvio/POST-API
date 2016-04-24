@@ -368,14 +368,14 @@ public class APIClientPOST {
     }
 
     /**
-     * Get contact from section into stats
+     * Get contacts from section into stat
      * @param id id stat/campaign
      * @param section Use the const STAT_SECTION_*
      * @param outputMode Use the const OUTPUT_MODE_*
      * @return string
      * @throws Exception
      */
-    public String getStats(Integer id,String section,String outputMode) throws Exception{
+    public String getContactsStatSection(Integer id,String section,String outputMode) throws Exception{
 
         Map<String,String> data = new HashMap<String,String>();
         data.put("action","get_contacts_stat_section");

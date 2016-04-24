@@ -1,4 +1,42 @@
 POST-API
 ========
 
-Teenvio POST-API v1.2-201412
+Teenvio POST-API v2-201604
+
+# Documentation
+
+PDF and HTML doc in 
+/doc
+
+# Code and Examples
+
+## PHP
+
+- Main Class:
+
+/example/PHP/class/APIClientPOST.php
+
+- Code Example
+
+/example/PHP/simple_example_class_client.php
+
+
+## C#
+
+- Main Class:
+
+/example/C_Sharp/Example_API-POST/TeenvioAPI/TeenvioAPI.cs
+
+- Code Examples
+
+/example/C_Sharp/Example_API-POST/
+
+## Java
+
+- Main Class:
+
+/example/TeenvioJavaCLI/src/com/ipdea/teenvio/TeenvioJavaCLI
+
+- Code Example
+
+/example/TeenvioJavaCLI/

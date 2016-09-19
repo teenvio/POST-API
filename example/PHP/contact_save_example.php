@@ -4,9 +4,9 @@ if (isset($_POST['email'])){
 
 	require_once './class/APIClientPOST.php';
 
-	$user="victor";
-	$plan="teenviov3";
-	$pass="tor152";
+	$user="user";
+	$plan="acount";
+	$pass="pass";
 
 	$api=new Teenvio\APIClientPOST($user,$plan,$pass);
 	$id= $api->saveContact($_POST);

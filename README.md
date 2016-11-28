@@ -1,7 +1,7 @@
 POST-API
 ========
 
-Teenvio POST-API v2-201604
+Teenvio POST-API v2.3-201611
 
 # Documentation
 
@@ -21,7 +21,7 @@ PDF and HTML doc in
 /example/PHP/simple_example_class_client.php
 
 
-## C#
+## C Sharp
 
 - Main Class:
 

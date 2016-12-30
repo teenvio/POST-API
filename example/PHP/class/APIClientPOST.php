@@ -1,6 +1,6 @@
 <?php
-
 namespace Teenvio;
+require_once __DIR__.'/APIException.php';
 
 /**
  * @package API
@@ -13,7 +13,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="1.0-php-20150720";
+	const clientVersion="2.0-php-20161228";
 	
 	/**
 	 * Outputs Mode 
@@ -64,7 +64,13 @@ class APIClientPOST{
 	 * URL API Post
 	 * @var string
 	 */
-	private $urlBase="https://master2.teenvio.com/v4/public/api/post/";
+	private $urlBase="https://central1.teenvio.com/v4/public/api/post/";
+	
+	/**
+	 * URL API Post
+	 * @var string
+	 */
+	private $urlCall="";
 	
 	/**
 	 * HTTP Method
@@ -91,6 +97,11 @@ class APIClientPOST{
 		$this->user=$user;
 		$this->plan=$plan;
 		$this->pass=$pass;
+		
+		if ($this->urlCall=="" && $this->ping()) {
+			//Calculate the URL Call for acount
+			$this->urlCall=$this->getURLCall();
+		}
 	}
 	
 	/**
@@ -287,17 +298,17 @@ class APIClientPOST{
 	/**
 	 * Deactivate Contact from sender
 	 * @param string $email
-	 * @param string $fromId
+	 * @param string $senderId
 	 * @throws TeenvioException
 	 */
-	public function deactivateContact($email,$fromId){
+	public function deactivateContact($email,$senderId){
 		$data=array();
 		$data['action']='contact_deactivate';
 		$data['plan']=$this->plan;
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;
 		$data['email']=$email;
-		$data['rid']=$fromId;
+		$data['rid']=$senderId;
 		
 		$bruto=$this->getResponse($data);
 		
@@ -309,17 +320,17 @@ class APIClientPOST{
 	/**
 	 * Activate Contact from sender
 	 * @param string $email
-	 * @param string $fromId
+	 * @param string $senderId
 	 * @throws TeenvioException
 	 */
-	public function activateContact($email,$fromId){
+	public function activateContact($email,$senderId){
 		$data=array();
 		$data['action']='contact_activate';
 		$data['plan']=$this->plan;
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;
 		$data['email']=$email;
-		$data['rid']=$fromId;
+		$data['rid']=$senderId;
 		
 		$bruto=$this->getResponse($data);
 		
@@ -378,6 +389,57 @@ class APIClientPOST{
 	}
 	
 	/**
+	 * Return from in $outputMode Format
+	 * Use the consts self::OUTPUT_MODE_* for $outputMode
+	 * @param int $id
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @return string
+	 * @throws TeenvioException
+	 */
+	public function getAcountData($outputMode=self::OUTPUT_MODE_XML){
+		$data=array();
+		$data['action']='get_acount_data';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Return from in $outputMode Format
+	 * Use the consts self::OUTPUT_MODE_* for $outputMode
+	 * @param int $id
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @return string
+	 * @throws TeenvioException
+	 */
+	public function getFrom($id,$outputMode=self::OUTPUT_MODE_XML){
+		$data=array();
+		$data['action']='get_from';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['mode']=$outputMode;
+		$data['rid']=$id;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
 	 * Get contact from section into stats
 	 * @param int $id id stat/campaing
 	 * @param string $section Use the consts self::STAT_SECTION_*
@@ -408,17 +470,18 @@ class APIClientPOST{
 	 * Send Email/campaing
 	 * @param int $idGroup
 	 * @param int $idNewsletter
-	 * @param int $idFrom
+	 * @param int $senderId
 	 * @param string $name Interal private name
 	 * @param string $subject 
 	 * @param string $analytics
 	 * @param boolean $header Header with link for reading into navigator
 	 * @param boolean $headerShare Header with links for sharing into social networks
 	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @param array $vars Associative Array (table hash) for parse custom vars into email
 	 * @return int New Campaing/Stat Id
 	 * @throws TeenvioException
 	 */
-	public function sendEmail($idGroup,$idNewsletter,$idFrom,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false){
+	public function sendEmail($idGroup,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null){
 		$data=array();
 		$data['action']='send_campaign';
 		$data['plan']=$this->plan;
@@ -426,13 +489,16 @@ class APIClientPOST{
 		$data['pass']=$this->pass;
 		$data['gid']=$idGroup;
 		$data['pid']=$idNewsletter;
-		$data['rid']=$idFrom;
+		$data['rid']=$senderId;
 		$data['name']=$name;
 		$data['subject']=$subject;
 		$data['analytics']=$analytics;
 		$data['cab']=($header) ? 1 : 0;
 		$data['share']=($headerShare) ? 1 : 0;
 		$data['social_foot']=($socialFoot) ? 1 : 0;
+		if (is_array($vars)){
+			$data['vars']=json_encode($vars);
+		}
 		
 		$bruto=$this->getResponse($data);
 		
@@ -447,17 +513,18 @@ class APIClientPOST{
 	 * Send Email/campaing to one contact
 	 * @param int $idContact
 	 * @param int $idNewsletter
-	 * @param int $idFrom
+	 * @param int $senderId
 	 * @param string $name Interal private name
 	 * @param string $subject 
 	 * @param string $analytics
 	 * @param boolean $header Header with link for reading into navigator
 	 * @param boolean $headerShare Header with links for sharing into social networks
 	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @param array $vars Associative Array (table hash) for parse custom vars into email
 	 * @return int New Campaing/Stat Id
 	 * @throws TeenvioException
 	 */
-	public function sendEmailUnique($idContact,$idNewsletter,$idFrom,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false){
+	public function sendEmailUnique($idContact,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null){
 		$data=array();
 		$data['action']='send_campaign';
 		$data['plan']=$this->plan;
@@ -465,18 +532,93 @@ class APIClientPOST{
 		$data['pass']=$this->pass;
 		$data['contact_id']=$idContact;
 		$data['pid']=$idNewsletter;
-		$data['rid']=$idFrom;
+		$data['rid']=$senderId;
 		$data['name']=$name;
 		$data['subject']=$subject;
 		$data['analytics']=$analytics;
 		$data['cab']=($header) ? 1 : 0;
 		$data['share']=($headerShare) ? 1 : 0;
 		$data['social_foot']=($socialFoot) ? 1 : 0;
+		if (is_array($vars)){
+			$data['vars']=json_encode($vars);
+		}
 		
 		$bruto=$this->getResponse($data);
 		
 		if (substr($bruto,0,2)=="OK"){
 			return (int) substr($bruto,3);
+		}
+		
+		throw new TeenvioException($bruto);
+	}
+	
+	/**
+	 * Save Newsletter
+	 * @param string $name Newsletter name
+	 * @param string $html HTML
+	 * @param string $plain Text Plain
+	 * @param int $idNewsletter Id newsletter, for update data
+	 * @return int Id saved newsletter
+	 * @throws TeenvioException
+	 */
+	public function saveNewsletter($name,$html,$plain="",$idNewsletter=0){
+		$data=array();
+		$data['action']='newsletter_save';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		
+		$data['id_newsletter']=$idNewsletter;
+		$data['name']=$name;
+		$data['html']=$html;
+		$data['plain']=$plain;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="OK"){
+			return (int) substr($bruto,3);
+		}
+		
+		throw new TeenvioException($bruto);
+	}
+	
+	/**
+	 * Delete Newsletter
+	 * @param int $idNewsletter
+	 * @throws TeenvioException
+	 */
+	public function deleteNewsletter($idNewsletter){
+		$data=array();
+		$data['action']='newsletter_delete';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		
+		$data['id_newsletter']=$idNewsletter;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)!="OK"){
+			throw new TeenvioException($bruto);
+		}
+	}
+	
+	/**
+	 * Get URL Call for acount
+	 * @return string
+	 * @throws TeenvioException
+	 */
+	public function getURLCall(){
+		$data=array();
+		$data['action']='get_url_call';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="OK"){
+			return substr($bruto,4);
 		}
 		
 		throw new TeenvioException($bruto);
@@ -489,7 +631,14 @@ class APIClientPOST{
 	 */
 	private function getResponse($data){
 		
-		$url=$this->urlBase;
+		$data['client']=self::clientVersion;
+		
+		$url=$this->urlCall;
+		
+		if ($this->urlCall==""){
+			$url=$this->urlBase;
+		}
+		
 		$context=null;
 		
 		switch($this->apiMethod){
@@ -541,7 +690,5 @@ class APIClientPOST{
 	}
 	
 }
-
-class TeenvioException extends \Exception{}
 
 ?>

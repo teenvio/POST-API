@@ -13,7 +13,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="2.0-php-20161228";
+	const clientVersion="2.2-php-201703";
 	
 	/**
 	 * Outputs Mode 
@@ -351,6 +351,76 @@ class APIClientPOST{
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;
 		$data['email']=$email;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Return group data
+	 * @param int $gid
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
+	 */
+	public function getGroupData($gid,$outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='group_data';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['gid']=$gid;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Return group contacts list
+	 * @param int $gid
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
+	 */
+	public function getGroupContacts($gid,$outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='group_list_contacts';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['gid']=$gid;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Get groups list
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
+	 */
+	public function getGroupList($outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='group_list';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
 		$data['mode']=$outputMode;
 		
 		$bruto=$this->getResponse($data);

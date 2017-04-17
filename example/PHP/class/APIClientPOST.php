@@ -7,13 +7,14 @@ require_once __DIR__.'/APIException.php';
  * @author Víctor J. Chamorro <victor@ipdea.com>
  * @copyright (c) Teenvio/Ipdea Land
  * @license LGPL v3
+ * @link https://github.com/teenvio/POST-API/blob/master/doc/POST-API_es.pdf
  */
 class APIClientPOST{
 	
 	/**
 	 * @var string
 	 */
-	const clientVersion="2.2-php-201703";
+	const clientVersion="2.3-php-201704";
 	
 	/**
 	 * Outputs Mode 
@@ -92,13 +93,18 @@ class APIClientPOST{
 	 * @param string $user
 	 * @param string $plan
 	 * @param string $pass
+	 * @throws \Teenvio\TeenvioException
 	 */
 	public function __construct($user,$plan,$pass) {
 		$this->user=$user;
 		$this->plan=$plan;
 		$this->pass=$pass;
 		
-		if ($this->urlCall=="" && $this->ping()) {
+		if (!$this->ping()){
+			throw new TeenvioException($this->lastResponse);
+		}
+		
+		if ($this->urlCall=="") {
 			//Calculate the URL Call for acount
 			$this->urlCall=$this->getURLCall();
 		}
@@ -711,51 +717,88 @@ class APIClientPOST{
 		
 		$context=null;
 		
-		switch($this->apiMethod){
-			case 'post':
-				//POST: create a build_query
-				$data=http_build_query($data);
+		if (ini_get('allow_url_fopen')=="1"){
+			
+			switch($this->apiMethod){
+				case 'post':
+					//POST: create a build_query
+					$data=http_build_query($data);
+
+					$context = stream_context_create(array(
+						'http' => array(
+							'ignore_errors' => true,	//Enable response with http return code != 200
+							'method' => 'POST',
+							'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
+								. "Content-Length: " . strlen($data) . "\r\n"
+								. "User-Agent: Robot APIClientPOST - ".self::clientVersion,
+							'content' => $data
+						)
+					));
+					break;
+				case 'get':
+					//GET: create a url with all data params
+					$url.='?';
+					foreach($data as $name=>$value){
+						$url.=$name.'='.urlencode($value).'&';
+					}
+
+					$context = stream_context_create(array(
+						'http' => array(
+							'ignore_errors' => true,	//Enable response with http return code != 200
+							'method' => 'GET',
+							'header'=> "User-Agent: Robot APIClientPOST - ".self::clientVersion
+						)
+					));
+					break;
+				default:			
+					throw new TeenvioException('method not valid');
+			}
+
+			$this->lastResponse=file_get_contents($url,false,$context);
+			
+		}elseif (function_exists('curl_init')){
 				
-				$context = stream_context_create(array(
-					'http' => array(
-						'ignore_errors' => true,	//Enable response with http return code != 200
-						'method' => 'POST',
-						'header'=> "Content-type: application/x-www-form-urlencoded\r\n"
-							. "Content-Length: " . strlen($data) . "\r\n"
-							. "User-Agent: Robot APIClientPOST - ".self::clientVersion,
-						'content' => $data
-					)
-				));
-				break;
-			case 'get':
-				//GET: create a url with all data params
-				$url.='?';
-				foreach($data as $name=>$value){
-					$url.=$name.'='.urlencode($value).'&';
-				}
-				
-				$context = stream_context_create(array(
-					'http' => array(
-						'ignore_errors' => true,	//Enable response with http return code != 200
-						'method' => 'GET',
-						'header'=> "User-Agent: Robot APIClientPOST - ".self::clientVersion
-					)
-				));
-				break;
-			default:			
-				throw new TeenvioException('method not valid');
+			switch($this->apiMethod){
+				case 'post':
+					$curl_sesion = curl_init($url);
+					if ($curl_sesion){
+						curl_setopt($curl_sesion, CURLOPT_POST, true);
+						curl_setopt($curl_sesion, CURLOPT_POSTFIELDS, $data);
+						curl_setopt($curl_sesion, CURLOPT_HEADER, false);
+						curl_setopt($curl_sesion, CURLOPT_USERAGENT, 'Robot APIClientPOST - '.self::clientVersion);
+						curl_setopt($curl_sesion, CURLOPT_RETURNTRANSFER, true);
+						$this->lastResponse=curl_exec($curl_sesion);
+						curl_close($curl_sesion);
+					}
+					break;
+				case 'get':
+					$url.='?';
+					foreach($data as $name=>$value){
+						$url.=$name.'='.urlencode($value).'&';
+					}
+					$curl_sesion = curl_init($url);
+					if ($curl_sesion){
+						curl_setopt($curl_sesion, CURLOPT_HEADER, false);
+						curl_setopt($curl_sesion, CURLOPT_USERAGENT, 'Robot APIClientPOST - '.self::clientVersion);
+						curl_setopt($curl_sesion, CURLOPT_RETURNTRANSFER, true);
+						$this->lastResponse=curl_exec($curl_sesion);
+						curl_close($curl_sesion);
+					}
+					break;
+				default:			
+					throw new TeenvioException('method not valid');
+			}
+		}else{
+			return 'KO: Remote connections are not enable. Please contact to hosting administrator: allow_url_fopen disabled and cURL not enabled';
 		}
 		
-		$response=file_get_contents($url,false,$context);
 		
-		$this->lastResponse=$response;
-
-		if ($response!==false && substr($response,0,2)=='OK'){
+		if ($this->lastResponse!==false && substr($this->lastResponse,0,2)=='OK'){
 			//OK
-			return $response;
+			return $this->lastResponse;
 		}else{
 			//KO/FAIL
-			return $response;
+			return $this->lastResponse;
 		}
 	}
 	

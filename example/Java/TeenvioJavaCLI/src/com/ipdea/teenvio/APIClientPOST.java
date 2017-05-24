@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public class APIClientPOST {
 
-    public static final String clientVersion="1.0-java-20160424";
+    public static final String clientVersion="2.0-java-20170523";
 
     /**
      * Outputs Mode 
@@ -46,7 +46,12 @@ public class APIClientPOST {
     /**
      * URL API Post
      */
-    private static final String urlBase="https://master2.teenvio.com/v4/public/api/post/";
+    private static final String urlBase="https://central1.teenvio.com/v4/public/api/post/";   //URL de desarrollo que cuando salga a produccion cambiarla
+
+    /**
+     * URL API Post
+     */
+    private String urlCall="";
 
     /**
      * User
@@ -66,7 +71,7 @@ public class APIClientPOST {
     /**
      * HTTP Method
      */
-    private String apiMethod="post";
+    private String apiMethod="get";
 
     /**
      * Las response from server
@@ -83,6 +88,14 @@ public class APIClientPOST {
         this.user=user;
         this.plan=plan;
         this.pass=pass;
+
+        if (this.urlCall.equals("")){
+            try {
+                this.urlCall = this.getURLCall();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -120,7 +133,31 @@ public class APIClientPOST {
         String raw=this.getResponse(data);
 
         if (raw.substring(0,2).equals("OK")){
-            return raw.substring(3);
+            return raw.substring(4);
+        }
+
+        throw new Exception(raw);
+    }
+
+    /**
+     * Get URL Call for acount
+     * @return URL
+     * @throws Exception
+     */
+    public String getURLCall() throws Exception {
+
+        if (!this.urlCall.equals("")){
+            return this.urlCall;
+        }
+
+        Map<String,String> data = new HashMap<String, String>();
+
+        data.put("action","get_url_call");
+
+        String raw=this.getResponse(data);
+
+        if (raw.substring(0,2).equals("OK")){
+            return raw.substring(4);
         }
 
         throw new Exception(raw);
@@ -153,7 +190,7 @@ public class APIClientPOST {
         String raw=this.getResponse(data);
 
         if (raw.substring(0,2).equals("OK")){
-            return Integer.valueOf(raw.substring(3));
+            return Integer.valueOf(raw.substring(4));
         }
 
         throw new Exception(raw);
@@ -200,7 +237,7 @@ public class APIClientPOST {
         if (!raw.substring(0,2).equals("OK")){
             throw new Exception(raw);
         }
-        return Integer.valueOf(raw.substring(3));
+        return Integer.valueOf(raw.substring(4));
     }
 
     public Integer saveGroup(String name,String description) throws Exception{
@@ -336,6 +373,18 @@ public class APIClientPOST {
      * Return stats in $outputMode Format
      * Use the const self::OUTPUT_MODE_* for $outputMode
      * @param id Stats / Campaign id
+     * @return string
+     * @throws Exception
+     */
+    public String getStats(Integer id) throws Exception{
+        return this.getStats(id,APIClientPOST.OUTPUT_MODE_JSON);
+    }
+
+
+    /**
+     * Return stats in $outputMode Format
+     * Use the const self::OUTPUT_MODE_* for $outputMode
+     * @param id Stats / Campaign id
      * @param outputMode Use the consts self::OUTPUT_MODE_*
      * @return string
      * @throws Exception
@@ -356,23 +405,114 @@ public class APIClientPOST {
         return raw;
     }
 
+
     /**
-     * Return stats in $outputMode Format
+     * Return data plan in $outputMode Format
      * Use the const self::OUTPUT_MODE_* for $outputMode
-     * @param id Stats / Campaign id
      * @return string
      * @throws Exception
      */
-    public String getStats(Integer id) throws Exception{
-        return this.getStats(id,APIClientPOST.OUTPUT_MODE_JSON);
+    public String getAcountData() throws Exception{
+        return this.getAcountData(APIClientPOST.OUTPUT_MODE_JSON);
     }
+
+
+    /**
+     * Return acount data in $outputMode Format
+     * Use the const self::OUTPUT_MODE_* for $outputMode
+     * @param outputMode Use the consts self::OUTPUT_MODE_*
+     * @return string
+     * @throws Exception
+     */
+    public String getAcountData(String outputMode) throws Exception{
+
+        Map<String,String> data = new HashMap<String,String>();
+        data.put("action","get_acount_data");
+        data.put("mode",outputMode);
+
+        String raw=this.getResponse(data);
+
+        if (raw.trim().equals("")){
+            throw new Exception(raw);
+        }
+
+        return raw;
+    }
+
+
+    /**
+     * Return From in $outputMode Format
+     * Use the const self::OUTPUT_MODE_* for $outputMode
+     * @param rid From id
+     * @return
+     * @throws Exception
+     */
+    public String getFrom(Integer rid) throws Exception{
+        return this.getFrom( rid,APIClientPOST.OUTPUT_MODE_JSON);
+    }
+
+    /**
+     * Return from in $outputMode Format
+     * @param rid
+     * @param outputMode
+     * @return string
+     * @throws Exception
+     */
+    public String getFrom( Integer rid, String outputMode) throws Exception{
+
+        Map<String,String> data = new HashMap<String,String>();
+        data.put("action","get_from");
+        data.put("rid",rid.toString());
+        data.put("mode",outputMode);
+
+        String raw=this.getResponse(data);
+
+        if (raw.trim().equals("")){
+            throw new Exception(raw);
+        }
+
+        return raw;
+
+    }
+
+    /**
+     * Return campaigns list in json
+     * @throws Exception
+     */
+    public String getCampaigns() throws Exception{
+        return this.getCampaigns(APIClientPOST.OUTPUT_MODE_JSON);
+    }
+
+    /**
+     * Return campaigns list in $outputMode Format
+     * Use the const self::OUTPUT_MODE_* for $outputMode
+     * @param outputMode Use the consts self::OUTPUT_MODE_*
+     * @return string
+     * @throws Exception
+     */
+    public String getCampaigns(String outputMode) throws Exception{
+
+        Map<String,String> data = new HashMap<String,String>();
+        data.put("action","get_campaigns");
+        data.put("mode",outputMode);
+
+        String raw=this.getResponse(data);
+
+        if (raw.trim().equals("")){
+            throw new Exception(raw);
+        }
+
+        return raw;
+    }
+
+
 
     /**
      * Get contacts from section into stat
      * @param id id stat/campaign
      * @param section Use the const STAT_SECTION_*
      * @param outputMode Use the const OUTPUT_MODE_*
-     * @return string
+     * @return String
      * @throws Exception
      */
     public String getContactsStatSection(Integer id,String section,String outputMode) throws Exception{
@@ -386,6 +526,38 @@ public class APIClientPOST {
         String raw=this.getResponse(data);
 
         if (!raw.substring(0,2).equals("OK")){
+            throw new Exception(raw);
+        }
+
+        return raw;
+    }
+
+    /**
+     * Get Newsletter data
+     * @param id
+     * @return String
+     * @throws Exception
+     */
+    public String getNewsletterData(Integer id) throws Exception{
+        return this.getNewsletterData(id,APIClientPOST.OUTPUT_MODE_JSON);
+    }
+
+    /**
+     * Get Newsletter data
+     * @param id
+     * @param outputMode Use the const OUTPUT_MODE_*
+     * @return String
+     * @throws Exception
+     */
+    public String getNewsletterData(Integer id, String outputMode) throws Exception{
+        Map<String,String> data = new HashMap<String,String>();
+        data.put("action","newsletter_data");
+        data.put("id_newsletter",id.toString());
+        data.put("mode",outputMode);
+
+        String raw=this.getResponse(data);
+
+        if (raw.substring(0,2).equals("KO")){
             throw new Exception(raw);
         }
 
@@ -494,7 +666,7 @@ public class APIClientPOST {
         data.put("user",this.user);
         data.put("pass",this.pass);
 
-        String sUrl= APIClientPOST.urlBase+"?";
+        String sUrl= (this.urlCall.equals("") ? APIClientPOST.urlBase : this.urlCall)+"?";
 
         for (String key : data.keySet()){
             sUrl+=key+"="+data.get(key)+"&";
@@ -518,26 +690,6 @@ public class APIClientPOST {
 
         return buffer;
     }
-
-    /**
-     * GET HTTP petition
-     *
-     * @param data MAP URL parameters
-     * @return JSONObject
-     */
-    /*private JSONObject UrlGetJson(Map<String,String> data){
-        JSONObject buffer=null;
-        String sBuffer;
-
-        sBuffer = this.URLGet(data);
-        try {
-            buffer= (JSONObject) new JSONTokener(sBuffer).nextValue();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return buffer;
-    }*/
 
 
 }

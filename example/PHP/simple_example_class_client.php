@@ -3,15 +3,16 @@ require_once './class/APIClientPOST.php';
 
 use Teenvio\APIClientPOST as APIClient;
 
-if (!isset($_GET['key'],$_GET['keyref'])){
-	UTLHttp::sendBadRequest('No han llegado los parámetros necesarios');
-}
 
 try{
 	$api=new APIClient('user', 'plan/acount', 'pass');
 	
 	$api->ping();
 	
+	echo "<br/> Contact fields:<br><pre>";
+	print_r(json_decode($api->getContactFields(),true));
+	echo "</pre>";
+		
 	echo "<br/> Version: ".$api->getServerVersion();
 	
 	$contact=array(
@@ -25,7 +26,7 @@ try{
 	/**
 	 * Change this id for your id stats
 	 */
-	$json=$api->getStats(1510, APIClient::OUTPUT_MODE_JSON);
+	$json=$api->getStats(15, APIClient::OUTPUT_MODE_JSON);
 	
 	echo "<br/> Estadísticas:<br/><pre>".print_r(json_decode($json,true),true)."</pre>";
 	

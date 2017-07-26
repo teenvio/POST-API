@@ -14,7 +14,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="2.3-php-201704";
+	const clientVersion="2.4-php-201707";
 	
 	/**
 	 * Outputs Mode 
@@ -186,7 +186,7 @@ class APIClientPOST{
 		$bruto=$this->getResponse($data);
 		
 		if (substr($bruto,0,2)=="OK"){
-			return (int) substr($bruto,3);
+			return (int) substr($bruto,4);
 		}
 		
 		throw new TeenvioException($bruto);
@@ -349,6 +349,7 @@ class APIClientPOST{
 	 * Return all ocntacta data: fields, groups and campaings
 	 * @param string $email
 	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
 	 */
 	public function getContactData($email,$outputMode=self::OUTPUT_MODE_JSON){
 		$data=array();
@@ -357,6 +358,28 @@ class APIClientPOST{
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;
 		$data['email']=$email;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Return fields names and internal names from contacts
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
+	 */
+	public function getContactFields($outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='contact_fields';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
 		$data['mode']=$outputMode;
 		
 		$bruto=$this->getResponse($data);
@@ -579,7 +602,7 @@ class APIClientPOST{
 		$bruto=$this->getResponse($data);
 		
 		if (substr($bruto,0,2)=="OK"){
-			return (int) substr($bruto,3);
+			return (int) substr($bruto,4);
 		}
 		
 		throw new TeenvioException($bruto);
@@ -622,7 +645,7 @@ class APIClientPOST{
 		$bruto=$this->getResponse($data);
 		
 		if (substr($bruto,0,2)=="OK"){
-			return (int) substr($bruto,3);
+			return (int) substr($bruto,4);
 		}
 		
 		throw new TeenvioException($bruto);
@@ -652,7 +675,7 @@ class APIClientPOST{
 		$bruto=$this->getResponse($data);
 		
 		if (substr($bruto,0,2)=="OK"){
-			return (int) substr($bruto,3);
+			return (int) substr($bruto,4);
 		}
 		
 		throw new TeenvioException($bruto);
@@ -677,6 +700,82 @@ class APIClientPOST{
 		if (substr($bruto,0,2)!="OK"){
 			throw new TeenvioException($bruto);
 		}
+	}
+	
+	/**
+	 * Get Newsletter data
+	 * @param type $idNewsletter
+	 * @param type $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @return string
+	 * @throws TeenvioException
+	 */
+	public function getNewsletterData($idNewsletter,$outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='newsletter_data';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		
+		$data['mode']=$outputMode;
+		$data['id_newsletter']=$idNewsletter;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+	}
+	
+	/**
+	 * Upload a file
+	 * @param string $name
+	 * @param string $raw Binary/raw content
+	 * @param string $path
+	 * @return string Public URL
+	 * @throws TeenvioException
+	 */
+	public function uploadFile($name,$raw,$path='/'){
+		$data=array();
+		$data['action']='newsletter_add_file';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['name']=$name;
+		$data['path']=$path;
+		$data['content']=  base64_encode($raw);
+		$data['encoding']= 'base64';
+				
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="OK"){
+			return substr($bruto,4);
+		}
+		
+		throw new TeenvioException($bruto);
+	}
+	
+	/**
+	 * Get sender list
+	 * @param string $outputMode Use the consts self::OUTPUT_MODE_*
+	 * @throws TeenvioException
+	 */
+	public function getSenderList($outputMode=self::OUTPUT_MODE_JSON){
+		$data=array();
+		$data['action']='sender_list';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['mode']=$outputMode;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
 	}
 	
 	/**

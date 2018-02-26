@@ -734,7 +734,7 @@ class APIClientPOST{
 	 * @throws TeenvioException
 	 */
 	
-	public function get_stats_hotzones($eid){
+	public function getStatsHotZones($eid){
 		$data=array();
 		$data['action']='get_stats_hotzones';
 		$data['plan']=$this->plan;
@@ -758,7 +758,7 @@ class APIClientPOST{
 	 * @return String HTML string
 	 * @throws TeenvioException
 	 */
-	public function get_stats_graphs($eid){
+	public function getStatsGraphs($eid){
 		$data=array();
 		$data['action']='get_stats_graphs';
 		$data['plan']=$this->plan;

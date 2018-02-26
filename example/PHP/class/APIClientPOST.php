@@ -727,6 +727,54 @@ class APIClientPOST{
 		
 		return $bruto;
 	}
+	/**
+	 * Get the hotzones from sent Newsletter 
+	 * @param String $eid
+	 * @return String HTML string
+	 * @throws TeenvioException
+	 */
+	
+	public function get_stats_hotzones($eid){
+		$data=array();
+		$data['action']='get_stats_hotzones';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['eid']=$eid;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+		
+	}
+	
+	/**
+	 * Get the graphs from sent Newsletter 
+	 * @param String $eid
+	 * @return String HTML string
+	 * @throws TeenvioException
+	 */
+	public function get_stats_graphs($eid){
+		$data=array();
+		$data['action']='get_stats_graphs';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['eid']=$eid;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		return $bruto;
+		
+	}
 	
 	/**
 	 * Upload a file

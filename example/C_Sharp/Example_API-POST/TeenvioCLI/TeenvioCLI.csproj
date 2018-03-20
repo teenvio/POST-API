@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\TeenvioAPI\TeenvioAPI.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeIdentifiers>linux-x64,win7-x64,osx.10.10-x64</RuntimeIdentifiers><!-- https://docs.microsoft.com/es-es/dotnet/core/rid-catalog -->
+  </PropertyGroup>
+
+</Project>

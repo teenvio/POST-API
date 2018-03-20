@@ -21,8 +21,7 @@ PDF and HTML doc in
 /example/PHP/simple_example_class_client.php
 
 
-## C Sharp
-
+## C#
 - Main Class:
 
 /example/C_Sharp/Example_API-POST/TeenvioAPI/TeenvioAPI.cs

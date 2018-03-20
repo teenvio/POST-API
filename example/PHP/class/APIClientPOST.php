@@ -495,7 +495,7 @@ class APIClientPOST{
 	 * @return string
 	 * @throws TeenvioException
 	 */
-	public function getAcountData($outputMode=self::OUTPUT_MODE_XML){
+	public function getAccountData($outputMode=self::OUTPUT_MODE_XML){
 		$data=array();
 		$data['action']='get_acount_data';
 		$data['plan']=$this->plan;
@@ -566,7 +566,36 @@ class APIClientPOST{
 	}
 	
 	/**
-	 * Send Email/campaing
+	 * Get last ids Campaings/Stats
+	 * @param int $limit
+	 * @return int[]
+	 * @throws TeenvioException
+	 */
+	public function getCampaigns($limit=25){
+		$data=array();
+		$data['action']='get_campaigns';
+		$data['plan']=$this->plan;
+		$data['user']=$this->user;
+		$data['pass']=$this->pass;
+		$data['mode']='plain';
+		$data['limit']=$limit;
+		
+		$bruto=$this->getResponse($data);
+		
+		if (substr($bruto,0,2)=="KO"){
+			throw new TeenvioException($bruto);
+		}
+		
+		$exit=explode("\n",$bruto);
+		array_walk($exit,function(&$item){
+			$item=(int)$item;
+		});
+		
+		return $exit;
+	}
+	
+	/**
+	 * Send Email/campaign
 	 * @param int $idGroup
 	 * @param int $idNewsletter
 	 * @param int $senderId
@@ -727,13 +756,13 @@ class APIClientPOST{
 		
 		return $bruto;
 	}
+
 	/**
 	 * Get the hotzones from sent Newsletter 
 	 * @param String $eid
 	 * @return String HTML string
 	 * @throws TeenvioException
 	 */
-	
 	public function getStatsHotZones($eid){
 		$data=array();
 		$data['action']='get_stats_hotzones';

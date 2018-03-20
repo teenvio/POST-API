@@ -1,7 +1,7 @@
 POST-API
 ========
 
-Teenvio POST-API v2.3-201611
+Teenvio POST-API
 
 # Documentation
 

@@ -46,7 +46,7 @@ public class APIClientPOST {
     /**
      * URL API Post
      */
-    private static final String urlBase="https://central1.teenvio.com/v4/public/api/post/";   //URL de desarrollo que cuando salga a produccion cambiarla
+    private static final String urlBase="https://central1.teenvio.com/v4/public/api/post/";
 
     /**
      * URL API Post

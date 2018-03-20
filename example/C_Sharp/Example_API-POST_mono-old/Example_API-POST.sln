@@ -1,10 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "web_API-POST", "Web_API-POST\web_API-POST.csproj", "{0720A196-9214-4346-B970-1068D8AB01A3}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesktopAPP_API-POST", "DesktopAPP_API-POST\DesktopAPP_API-POST.csproj", "{1A3FD9F2-EF57-4093-91FB-3E89327E6B67}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeenvioAPI", "TeenvioAPI\TeenvioAPI.csproj", "{76483F41-5186-42AC-938E-E2AD20EAD1E0}"
 EndProject
 Global
@@ -27,6 +23,6 @@ Global
 		{76483F41-5186-42AC-938E-E2AD20EAD1E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = DesktopAPP_API-POST\DesktopAPP_API-POST.csproj
+		StartupItem = Web_API-POST\web_API-POST.csproj
 	EndGlobalSection
 EndGlobal

@@ -20,13 +20,11 @@ namespace TeenvioCLI
             Console.WriteLine("TeenvioCLI API sample utility v1.0");
 
             if (this.connect()){
+                api.getServerVersion();
                 string version = api.getServerVersion();
                 Console.WriteLine("Connected! Server API Version: "+version);
 
-                this.saveExampleContact();
-                this.getExampleSenders();
-                this.getExampleListGroups();
-                
+                this.menuTest();                
             }
         }
 
@@ -145,7 +143,74 @@ namespace TeenvioCLI
                 line+=childrenNode.SelectSingleNode("contact_count[1]").InnerText;
                 Console.WriteLine(line);
             }
+        }
+
+        private void sendEmailTest(string mailTo,string subject,int idSender,string html){
+
+            try{
+
+                //1º create the newsletter content
+                int idNewsletter=api.SaveNewsletter("Newsletter test c# api",html,"text plain");
+
+                //2º create/update the contact
+                Dictionary<string, string> contact = new Dictionary<string, string>();
+                contact.Add ("email", mailTo.Trim());		//Email
+                int idContact=api.SaveContact(contact);
+
+                //3º send email/campaing
+                int idCampaing = api.SendEmailUnique(idContact,idNewsletter,idSender,"Api c# test",subject);
+
+                Console.WriteLine("- Send email id campaing: "+idCampaing.ToString());
+                return;
+
+            }catch(TeenvioException ex){
+				Console.WriteLine("Fail to send test: "+ex.Message);
+                return;
+			}
+        }
+
+        private void menuTest(){
+            Console.WriteLine();
+            Console.WriteLine("**************************");
+            Console.WriteLine("* Select example to run: *");
+            Console.WriteLine("**************************");
+            Console.WriteLine("[0] Exit");
+            Console.WriteLine("[1] Save Contact");
+            Console.WriteLine("[2] Get Senders");
+            Console.WriteLine("[3] Get Contacts Groups");
+            Console.WriteLine("[4] Send Email test");
+            Console.WriteLine();
+
+            string option = Console.ReadLine();
             
+            switch(option){
+                case "1":
+                    this.saveExampleContact();
+                    break;
+                case "2":
+                    this.getExampleSenders();
+                    break;
+                case "3":
+                    this.getExampleListGroups();
+                    break;
+                case "4":
+                    Console.Write("To:");
+                    string to = Console.ReadLine();
+                    Console.Write("Subject:");
+                    string subject=Console.ReadLine();
+                    Console.Write("From:");
+                    string from = Console.ReadLine();
+                    Console.Write("Body HTML:");
+                    string html = Console.ReadLine();
+
+                    this.sendEmailTest(to,subject, int.Parse(from) ,html);
+
+                    break;
+                case "0":
+                    return;              
+            }
+
+            this.menuTest();
         }
     }
 }

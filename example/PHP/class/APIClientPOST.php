@@ -14,7 +14,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="2.4-php-201707";
+	const clientVersion="2.5-php-201810";
 	
 	/**
 	 * Outputs Mode 
@@ -89,25 +89,39 @@ class APIClientPOST{
 	 * Instance a API client Class.
 	 * 
 	 * User, Plan/Acount, Password is required
+	 * url_call optional, default ''
+	 * ping optional, default true
 	 * 
 	 * @param string $user
 	 * @param string $plan
 	 * @param string $pass
+	 * @param string $url_call
+	 * @param boolean $ping
 	 * @throws \Teenvio\TeenvioException
 	 */
-	public function __construct($user,$plan,$pass) {
+	public function __construct($user,$plan,$pass,$url_call='',$ping=true) {
 		$this->user=$user;
 		$this->plan=$plan;
 		$this->pass=$pass;
 		
-		if (!$this->ping()){
+		if ($ping && $this->ping()==false){
 			throw new TeenvioException($this->lastResponse);
 		}
+		
+		if ($url_call!=='') $this->urlCall=$url_call;
 		
 		if ($this->urlCall=="") {
 			//Calculate the URL Call for acount
 			$this->urlCall=$this->getURLCall();
 		}
+	}
+	
+	/**
+	 * Return the current urlCall
+	 * @return string
+	 */
+	public function getCurrentURLCall(){
+		return $this->urlCall;
 	}
 	
 	/**
@@ -497,7 +511,7 @@ class APIClientPOST{
 	 */
 	public function getAccountData($outputMode=self::OUTPUT_MODE_XML){
 		$data=array();
-		$data['action']='get_acount_data';
+		$data['action']='get_account_data';
 		$data['plan']=$this->plan;
 		$data['user']=$this->user;
 		$data['pass']=$this->pass;

@@ -14,7 +14,7 @@ class APIClientPOST{
 	/**
 	 * @var string
 	 */
-	const clientVersion="2.5-php-201810";
+	const clientVersion="2.6-php-201902";
 	
 	/**
 	 * Outputs Mode 
@@ -616,14 +616,16 @@ class APIClientPOST{
 	 * @param string $name Interal private name
 	 * @param string $subject 
 	 * @param string $analytics
-	 * @param boolean $header Header with link for reading into navigator
-	 * @param boolean $headerShare Header with links for sharing into social networks
-	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @param boolean $header Enable/Disable Header with link for reading into navigator
+	 * @param boolean $headerShare Enable/Disable Header with links for sharing into social networks
+	 * @param boolean $socialFoot Enable/Disable Foot with links for your social networks profiles
 	 * @param array $vars Associative Array (table hash) for parse custom vars into email
+	 * @param boolean $tracking_opening Enable/Disable email opening tracking
+	 * @param boolean $tracking_clicks Enable/Disable email opening tracking
 	 * @return int New Campaing/Stat Id
 	 * @throws TeenvioException
 	 */
-	public function sendEmail($idGroup,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null){
+	public function sendEmail($idGroup,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null,$tracking_opening=true,$tracking_clicks=true){
 		$data=array();
 		$data['action']='send_campaign';
 		$data['plan']=$this->plan;
@@ -638,7 +640,9 @@ class APIClientPOST{
 		$data['cab']=($header) ? 1 : 0;
 		$data['share']=($headerShare) ? 1 : 0;
 		$data['social_foot']=($socialFoot) ? 1 : 0;
-		if (is_array($vars)){
+		$data['tracking_opening']=($tracking_opening) ? 1 : 0;
+		$data['tracking_clicks']=($tracking_clicks) ? 1 : 0;
+		if (is_array($vars) && count($vars)>0){
 			$data['vars']=json_encode($vars);
 		}
 		
@@ -659,14 +663,16 @@ class APIClientPOST{
 	 * @param string $name Interal private name
 	 * @param string $subject 
 	 * @param string $analytics
-	 * @param boolean $header Header with link for reading into navigator
-	 * @param boolean $headerShare Header with links for sharing into social networks
-	 * @param boolean $socialFoot Foot with links for your social networks profiles
+	 * @param boolean $header Enable/Disable Header with link for reading into navigator
+	 * @param boolean $headerShare Enable/Disable Header with links for sharing into social networks
+	 * @param boolean $socialFoot Enable/Disable Foot with links for your social networks profiles
 	 * @param array $vars Associative Array (table hash) for parse custom vars into email
+	 * @param boolean $tracking_opening Enable/Disable email opening tracking
+	 * @param boolean $tracking_clicks Enable/Disable email opening tracking
 	 * @return int New Campaing/Stat Id
 	 * @throws TeenvioException
 	 */
-	public function sendEmailUnique($idContact,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null){
+	public function sendEmailUnique($idContact,$idNewsletter,$senderId,$name,$subject,$analytics='',$header=true,$headerShare=false,$socialFoot=false,$vars=null,$tracking_opening=true,$tracking_clicks=true){
 		$data=array();
 		$data['action']='send_campaign';
 		$data['plan']=$this->plan;
@@ -681,7 +687,9 @@ class APIClientPOST{
 		$data['cab']=($header) ? 1 : 0;
 		$data['share']=($headerShare) ? 1 : 0;
 		$data['social_foot']=($socialFoot) ? 1 : 0;
-		if (is_array($vars)){
+		$data['tracking_opening']=($tracking_opening) ? 1 : 0;
+		$data['tracking_clicks']=($tracking_clicks) ? 1 : 0;
+		if (is_array($vars) && count($vars)>0){
 			$data['vars']=json_encode($vars);
 		}
 		

@@ -65,13 +65,13 @@ class APIClientPOST{
 	 * URL API Post
 	 * @var string
 	 */
-	private $urlBase="https://central1.teenvio.com/v4/public/api/post/";
+	private $urlBase="https://app.teenvio.com/v4/public/api/post/";
 	
 	/**
 	 * URL API Post
 	 * @var string
 	 */
-	private $urlCall="";
+	private $urlCall="https://app.teenvio.com/v4/public/api/post/";
 	
 	/**
 	 * HTTP Method
